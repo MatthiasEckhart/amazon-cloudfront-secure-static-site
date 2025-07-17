@@ -16,7 +16,7 @@ Metadata:
 Mappings:
   Solution:
     Constants:
-      Version: 'v0.14'
+      Version: 'v0.13'
 
 Rules:
   OnlyUsEast1:
@@ -38,14 +38,21 @@ Parameters:
   DomainName:
     Description: The part of a website address after your SubDomain - e.g. example.com
     Type: String
-  HostedZoneId:
-    Description: HostedZoneId for the domain e.g. Z23ABC4XYZL05B
-    Type: String
   CreateApex:
     Description: Create an Apex Alias in CloudFront distribution - yes/no
     Type: String
     Default: 'no'
     AllowedValues: ['yes', 'no']
+  EnableUrlRewrite:
+    Description: True, if URL Rewrite /x.html to /x should be enabled.
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
+  RedirectToWWW:
+    Description: True, if https://example.com should redirect to https://www.example.com.
+    Default: false
+    Type: String
+    AllowedValues: [true, false]
 
 Resources:
   CustomResourceStack:
@@ -64,7 +71,7 @@ Resources:
         SubDomain: !Ref SubDomain
         DomainName: !Ref DomainName
         CreateApex: !Ref CreateApex
-        HostedZoneId: !Ref HostedZoneId
+        RedirectToWWW: !Ref RedirectToWWW
       Tags:
         - Key: Solution
           Value: ACFS3
@@ -83,6 +90,8 @@ Resources:
         S3BucketRootArn: !GetAtt CustomResourceStack.Outputs.S3BucketRootArn
         S3BucketLogs: !GetAtt CustomResourceStack.Outputs.S3BucketLogs
         S3BucketLogsName: !GetAtt CustomResourceStack.Outputs.S3BucketLogsName
+        EnableUrlRewrite: !Ref EnableUrlRewrite
+        RedirectToWWW: !Ref RedirectToWWW
       Tags:
         - Key: Solution
           Value: ACFS3

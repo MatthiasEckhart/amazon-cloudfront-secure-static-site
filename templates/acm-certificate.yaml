@@ -8,13 +8,22 @@ Parameters:
     Type: String
   CreateApex:
     Type: String
-  HostedZoneId:
+  RedirectToWWW:
+    Description: True, if https://example.com should redirect to https://www.example.com.
+    Default: false
     Type: String
+    AllowedValues: [true, false]
 
 Conditions:
   CreateApexConfig: !Equals
     - !Ref CreateApex
     - 'yes'
+  ShouldRedirectToWWW:
+    !Equals [!Ref RedirectToWWW, 'true']
+  ShouldIncludeSAN:
+    Fn::Or:
+      - Condition: CreateApexConfig
+      - Condition: ShouldRedirectToWWW
 
 Resources:
   Certificate:
@@ -23,18 +32,18 @@ Resources:
       DomainName: !Sub '${SubDomain}.${DomainName}'
       SubjectAlternativeNames:
         Fn::If:
-          - CreateApexConfig
+          - ShouldIncludeSAN
           - - Ref: DomainName
           - Ref: AWS::NoValue
-      DomainValidationOptions:
-        - DomainName: !Sub '${SubDomain}.${DomainName}'
-          HostedZoneId: !Ref HostedZoneId
-        - Fn::If:
-            - CreateApexConfig
-            - DomainName: !Ref DomainName
-              HostedZoneId: !Ref HostedZoneId
-            - Ref: AWS::NoValue
-      ValidationMethod: DNS
+      # DomainValidationOptions:
+      #   - DomainName: !Sub '${SubDomain}.${DomainName}'
+      #     HostedZoneId: !Ref HostedZoneId
+      #   - Fn::If:
+      #       - CreateApexConfig
+      #       - DomainName: !Ref DomainName
+      #         HostedZoneId: !Ref HostedZoneId
+      #       - Ref: AWS::NoValue
+      # ValidationMethod: DNS
 
 Outputs:
   CertificateArn:

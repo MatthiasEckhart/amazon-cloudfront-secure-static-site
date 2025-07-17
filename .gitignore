@@ -38,3 +38,6 @@ witch.zip
 
 #nyc output
 **/.nyc_output
+
+# NodeJS
+source/witch/nodejs
